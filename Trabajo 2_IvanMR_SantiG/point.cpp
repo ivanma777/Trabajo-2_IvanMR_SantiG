@@ -35,3 +35,15 @@ void generateRandomPoints(std::vector<Point>& points, int amount, int width, int
         points.push_back(Point(x, y));
     }
 }
+
+//metodo graham
+int orientation(Point p, Point q, Point r)
+{
+    float value = (q.y - p.y) * (r.x - q.x) -
+        (q.x - p.x) * (r.y - q.y);
+
+    if (value == 0)
+        return 0;
+
+    return (value > 0) ? 1 : 2;
+}
