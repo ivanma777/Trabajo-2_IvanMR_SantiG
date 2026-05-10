@@ -1,17 +1,22 @@
-#include <SFML/Graphics.hpp>
+ï»¿#include <SFML/Graphics.hpp>
+#include <optional>
+#include <ctime>
 #include "Point.h"
 
 int main()
 {
-    // Vector de puntos
-    std::vector<Point> points;
-
-    // Añadir puntos
     srand(static_cast<unsigned>(time(nullptr)));
 
+    // generar puntos aleatorios
+    std::vector<Point> points;
     generateRandomPoints(points, 20, 800, 600);
-    // Crear ventana
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Convex Hull");
+
+    // calcular convex hull
+    std::vector<Point> hull = grahamScan(points);
+
+    // crear la ventana del programa
+    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Convex Hull - Graham Scan");
+    window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
@@ -23,17 +28,35 @@ int main()
 
         window.clear(sf::Color::Black);
 
-        // Dibujar puntos
+        if (hull.size() >= 2)
+        {
+            sf::VertexArray lines(sf::PrimitiveType::LineStrip, hull.size() + 1);
+            for (int i = 0; i <= (int)hull.size(); i++)
+            {
+                int idx = i % hull.size();
+                lines[i].position = { hull[idx].x, hull[idx].y };
+                lines[i].color = sf::Color::Cyan;
+            }
+            window.draw(lines);
+        }
+
+        //  Dibujar todos los puntos
         for (const Point& p : points)
         {
-            sf::CircleShape pointShape(5.f);
+            sf::CircleShape dot(5.f);
+            dot.setFillColor(sf::Color::White);
+            dot.setOrigin({ 5.f, 5.f });
+            dot.setPosition({ p.x, p.y });
+            window.draw(dot);
+        }
 
-            pointShape.setFillColor(sf::Color::White);
-
-            // Ajuste para centrar el círculo
-            pointShape.setPosition({ p.x - 5.f, p.y - 5.f });
-
-            window.draw(pointShape);
+        for (const Point& p : hull)
+        {
+            sf::CircleShape dot(7.f);
+            dot.setFillColor(sf::Color::Yellow);
+            dot.setOrigin({ 7.f, 7.f });
+            dot.setPosition({ p.x, p.y });
+            window.draw(dot);
         }
 
         window.display();
